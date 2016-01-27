@@ -1,5 +1,7 @@
 #!/usr/bin/python2
 # -*-coding:utf-8-*-
+import argparse
+from optparse import OptionParser
 import sys
 import subprocess
 from datetime import *
@@ -35,39 +37,39 @@ _VAR_NAMES = ['TIMEID',
               'ENDTIME'
               ]
 
-_DATE_ID_FORMAT = '%Y%m%d'
-_DATE_STR_FORMAT = '%Y-%m-%d'
-_TIME_ID_FORMAT = '%Y%m%d%H%M%S'
-_TIME_STR_FORMAT = '%Y-%m-%d %H:%M:%S'
-_MONTH_ID_FORMAT = '%Y%m'
+DATE_ID_FORMAT = '%Y%m%d'
+DATE_STR_FORMAT = '%Y-%m-%d'
+TIME_ID_FORMAT = '%Y%m%d%H%M%S'
+TIME_STR_FORMAT = '%Y-%m-%d %H:%M:%S'
+MONTH_ID_FORMAT = '%Y%m'
 
 
 def cal_var_values(time_id):
     var_values = []
     try:
-        base_time = datetime.strptime(time_id, _DATE_ID_FORMAT)
+        base_time = datetime.strptime(time_id, DATE_ID_FORMAT)
 
         # 1. TIMEID
         var_values.append(time_id)
 
         # 2. TIME
-        var_values.append(base_time.strftime(_DATE_STR_FORMAT))
+        var_values.append(base_time.strftime(DATE_STR_FORMAT))
 
         beforeday_base_time = base_time - timedelta(days=1)
         # 3. BEFOREDAY
-        var_values.append(beforeday_base_time.strftime(_DATE_ID_FORMAT))
+        var_values.append(beforeday_base_time.strftime(DATE_ID_FORMAT))
 
         # 4. BEFORETIME
-        var_values.append(beforeday_base_time.strftime(_DATE_STR_FORMAT))
+        var_values.append(beforeday_base_time.strftime(DATE_STR_FORMAT))
 
         # 5. BEFOREDAYNOFIRST
         if base_time.day == 1:
             var_values.append("0")
         else:
-            var_values.append(beforeday_base_time.strftime(_DATE_ID_FORMAT))
+            var_values.append(beforeday_base_time.strftime(DATE_ID_FORMAT))
 
         # 6. MONTHID
-        var_values.append(base_time.strftime(_MONTH_ID_FORMAT))
+        var_values.append(base_time.strftime(MONTH_ID_FORMAT))
 
         if base_time.month == 1:
             beforemonth_start, beforemonth_end = calendar.monthrange(base_time.year - 1, 12)
@@ -78,10 +80,10 @@ def cal_var_values(time_id):
             beforemonth_start_base_time = base_time.replace(month=base_time.month - 1, day=1)
             beforemonth_end_base_time = base_time.replace(month=base_time.month - 1, day=beforemonth_end)
         # 7. MONFIRSTDAY
-        var_values.append(beforemonth_start_base_time.strftime(_DATE_ID_FORMAT))
+        var_values.append(beforemonth_start_base_time.strftime(DATE_ID_FORMAT))
 
         # 8. MONENDDAY
-        var_values.append(beforemonth_end_base_time.strftime(_DATE_ID_FORMAT))
+        var_values.append(beforemonth_end_base_time.strftime(DATE_ID_FORMAT))
 
         # 9. WEEKID,注意跨年周，根据周所在哪一年天数较多决定所属哪一年
         week_int = int(base_time.strftime('%V'))
@@ -94,57 +96,57 @@ def cal_var_values(time_id):
 
         # 10. WEEKSTARTDAY
         week_start_base_time = base_time - timedelta(days=base_time.weekday())
-        var_values.append(week_start_base_time.strftime(_DATE_ID_FORMAT))
+        var_values.append(week_start_base_time.strftime(DATE_ID_FORMAT))
 
         # 11. WEEKENDDAY
         week_end_base_time = base_time + timedelta(days=6 - base_time.weekday())
-        var_values.append(week_end_base_time.strftime(_DATE_ID_FORMAT))
+        var_values.append(week_end_base_time.strftime(DATE_ID_FORMAT))
 
         # 12. STARTTIMEID
-        var_values.append(base_time.strftime(_TIME_ID_FORMAT))
+        var_values.append(base_time.strftime(TIME_ID_FORMAT))
 
         # 13. ENDTIMEID
-        var_values.append(base_time.replace(hour=23, minute=59, second=59).strftime(_TIME_ID_FORMAT))
+        var_values.append(base_time.replace(hour=23, minute=59, second=59).strftime(TIME_ID_FORMAT))
 
         month_start, month_end = calendar.monthrange(base_time.year, base_time.month)
         # 14. MONFIRSTTIME
-        var_values.append(base_time.replace(day=01).strftime(_DATE_STR_FORMAT))
+        var_values.append(base_time.replace(day=01).strftime(DATE_STR_FORMAT))
 
         # 15. MONENDTIME
-        var_values.append(base_time.replace(day=month_end).strftime(_DATE_STR_FORMAT))
+        var_values.append(base_time.replace(day=month_end).strftime(DATE_STR_FORMAT))
 
         # 16. CURMONFIRSTDAY
-        var_values.append(base_time.replace(day=01).strftime(_DATE_ID_FORMAT))
+        var_values.append(base_time.replace(day=01).strftime(DATE_ID_FORMAT))
 
         # 17. WEEKSTARTTIME
-        var_values.append(week_start_base_time.strftime(_DATE_STR_FORMAT))
+        var_values.append(week_start_base_time.strftime(DATE_STR_FORMAT))
 
         # 18. WEEKENDTIME
-        var_values.append(week_end_base_time.strftime(_DATE_STR_FORMAT))
+        var_values.append(week_end_base_time.strftime(DATE_STR_FORMAT))
 
         # 19. BEFOREDAYNOFIRSTWK
         if base_time.weekday() == 0:
             var_values.append("0")
         else:
-            var_values.append(beforeday_base_time.strftime(_DATE_ID_FORMAT))
+            var_values.append(beforeday_base_time.strftime(DATE_ID_FORMAT))
 
         # 20. THRITYDAYAGO
-        var_values.append((base_time - timedelta(days=31)).strftime(_DATE_ID_FORMAT))
+        var_values.append((base_time - timedelta(days=31)).strftime(DATE_ID_FORMAT))
 
         # 21. SIXTYDAYAGO
-        var_values.append((base_time - timedelta(days=61)).strftime(_DATE_ID_FORMAT))
+        var_values.append((base_time - timedelta(days=61)).strftime(DATE_ID_FORMAT))
 
         # 22. NINETYDAYAGO
-        var_values.append((base_time - timedelta(days=91)).strftime(_DATE_ID_FORMAT))
+        var_values.append((base_time - timedelta(days=91)).strftime(DATE_ID_FORMAT))
 
         # 23. DAYAGO120
-        var_values.append((base_time - timedelta(days=121)).strftime(_DATE_ID_FORMAT))
+        var_values.append((base_time - timedelta(days=121)).strftime(DATE_ID_FORMAT))
 
         # 24. STARTTIME
-        var_values.append(base_time.strftime(_TIME_STR_FORMAT))
+        var_values.append('"%s"' % base_time.strftime(TIME_STR_FORMAT))
 
         # 25. ENDTIME
-        var_values.append(base_time.replace(hour=23, minute=59, second=59).strftime(_TIME_STR_FORMAT))
+        var_values.append('"%s"' % base_time.replace(hour=23, minute=59, second=59).strftime(TIME_STR_FORMAT))
 
         return var_values
     except Exception, e:
@@ -152,27 +154,36 @@ def cal_var_values(time_id):
         raise Exception('parse time id error: %s' % e.message)
 
 
-def make_hive_args(time_id, hql_file):
+def make_hive_args(time_id, hive_vars=[], hql_file=''):
     hive_var_values = cal_var_values(time_id)
-    var_cmd = ' -hivevar '.join([x + '=' + y for x, y in zip(_VAR_NAMES, hive_var_values)])
-    return 'hive -hivevar {} -f {}'.format(var_cmd, hql_file)
+    var_cmd = ' -hivevar '.join(hive_vars + [x + '=' + y for x, y in zip(_VAR_NAMES, hive_var_values)])
+    if hql_file:
+        return 'hive -hivevar {} -f {}'.format(var_cmd, hql_file)
+    else:
+        return 'hive -hivevar {}'.format(var_cmd)
 
 
 def main():
-    if len(sys.argv) == 2:
-        time_id = (datetime.today() - timedelta(days=1)).strftime(_DATE_ID_FORMAT)
-        hql_file = sys.argv[1]
-    elif len(sys.argv) == 3:
-        arg_prefix = 'TIMEID='
-        if arg_prefix in sys.argv[1]:
-            time_id = sys.argv[1][len(arg_prefix):]
-            hql_file = sys.argv[2]
+    time_id = (datetime.today() - timedelta(days=1)).strftime(DATE_ID_FORMAT)
+
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('hql_file', help='hive sql file')
+    parser.add_argument('-t', '--tid', help='base date id format:yyyyMMdd default:yesterday',
+                        default=time_id, dest='time_id')
+    parser.add_argument('-m', '--max', help='max try times when fail, default:1', type=int,
+                         default=1, dest='max_try_times')
+    parser.add_argument('-hivevar', '--hivevar', help='extra hive var', action='append', dest='hive_vars')
+
+    args = parser.parse_args()
+    try_times = 0
+    hive_cmd = make_hive_args(args.time_id, args.hive_vars if args.hive_vars else [], args.hql_file)
+    while try_times < args.max_try_times:
+        s = subprocess.call(hive_cmd, shell=True)
+        if s == 0:
+            return True
         else:
-            raise Exception('arg[0] {} is not start with TIMEID='.format(sys.argv[0]))
-    else:
-        raise Exception(
-            'arg number illegal. you can call like "hive_driver.py ff" or "hive_driver.py TIMEID=yyyyMMdd ff"')
-    subprocess.call(make_hive_args(time_id, hql_file), shell=True)
+            try_times += 1
+    raise Exception('hive 执行出错！')
 
 
 if __name__ == '__main__':
