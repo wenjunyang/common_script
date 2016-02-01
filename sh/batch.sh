@@ -1,7 +1,7 @@
 #!/bin/sh
 
 ##########################################################
-# example. batch.sh 20150709 20150803 xxx.sh arg1 arg2 ...
+# example. batch.sh 20150709 20150803 x3log_collect.sh arg1 arg2 ...
 # 如果arg包含ARGTIMESTR，将会替换成YYYY-mm-dd
 # 如果arg包含ARGTIMEID,将会替换成YYYYmmdd
 ##########################################################
@@ -40,6 +40,6 @@ do
     comm=${args//ARGTIMESTR/$time_s}
     comm=${comm//ARGTIMEID/$time_id}
     echo +++++++++++$comm++++++++++++++++
-    bash $comm
+    $comm
     beg_s=$((beg_s+86400))
 done
