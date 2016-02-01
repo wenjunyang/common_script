@@ -1,3 +1,14 @@
+#!/bin/bash
+
+########################################################
+#  azkaban定时任务通过jenkins自动部署，适合版本azkaban 2.5.0+
+#  需要的参数：
+#  1. azkaban_username
+#  2. azkaban_password
+#  3. host
+#  4. project_name
+#  脚本执行时的工作目录为定时任务脚本所在的根目录
+########################################################
 zip_name="upload.zip"
 #打包
 zip -q -r ${zip_name} ${path}
